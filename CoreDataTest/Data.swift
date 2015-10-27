@@ -18,7 +18,7 @@ class Data {
     
     func generateContext() -> NSManagedObjectContext? {
         let managedObjectContext = NSManagedObjectContext(concurrencyType: NSManagedObjectContextConcurrencyType.PrivateQueueConcurrencyType)
-        managedObjectContext.parentContext = self.mainMoc
+        managedObjectContext.parentContext = self.saveMoc
         managedObjectContext.undoManager = nil
         return managedObjectContext
     }
@@ -37,7 +37,7 @@ class Data {
         return SignalProducer { [weak self] sink, disposable in
             print("Load data started")
             
-            self?.loadData(moc, count: 20000)
+            self?.loadData(moc, count: 50000)
             
             print("Load data finished")
             
@@ -131,41 +131,47 @@ class Data {
         return coordinator
         }()
     
-    lazy var saveContext: NSManagedObjectContext = {
+    lazy var saveMoc: NSManagedObjectContext = {
         let managedObjectContext = NSManagedObjectContext(concurrencyType: .PrivateQueueConcurrencyType)
         managedObjectContext.persistentStoreCoordinator = self.persistentStoreCoordinator
+        managedObjectContext.undoManager = nil
+        
+        NSNotificationCenter.defaultCenter().addObserverForName(NSManagedObjectContextDidSaveNotification, object: nil, queue: NSOperationQueue.mainQueue()) {
+            [weak self] notification in
+            if let savedContext = notification.object as? NSManagedObjectContext {
+                if savedContext == self?.saveMoc {
+                    return
+                }
+                
+                let priority = DISPATCH_QUEUE_PRIORITY_DEFAULT
+                dispatch_async(dispatch_get_global_queue(priority, 0)) {
+                    do {
+                        print("saving to save moc")
+                        self?.isBlockingMainThread()
+                        let startTime = NSDate.timeIntervalSinceReferenceDate()
+                        try self?.saveMoc.save()
+                        let endTime = NSDate.timeIntervalSinceReferenceDate()
+                        print("done saving to save moc- time \(endTime - startTime)")
+                    } catch let error {
+                        NSLog("An error occured while merging a store context save into the main thread context: \(error)")
+                        print("\(error)")
+                    }
+                }
+                
 
+            }
+        }
+
+        
         return managedObjectContext
     }()
     
     
     lazy var mainMoc: NSManagedObjectContext = {
         // Returns the managed object context for the application (which is already bound to the persistent store coordinator for the application.) This property is optional since there are legitimate error conditions that could cause the creation of the context to fail.
-        let coordinator = self.persistentStoreCoordinator
         let managedObjectContext = NSManagedObjectContext(concurrencyType: .MainQueueConcurrencyType)
-        managedObjectContext.persistentStoreCoordinator = coordinator
-        
-        NSNotificationCenter.defaultCenter().addObserverForName(NSManagedObjectContextDidSaveNotification, object: nil, queue: NSOperationQueue.mainQueue()) {
-            [weak self] notification in
-            if let savedContext = notification.object as? NSManagedObjectContext {
-                if savedContext == self?.mainMoc {
-                    return
-                }
-                
-                do {
-                    print("saving to main moc")
-                    self?.isBlockingMainThread()
-                    let startTime = NSDate.timeIntervalSinceReferenceDate()
-                    try self?.mainMoc.save()
-                    let endTime = NSDate.timeIntervalSinceReferenceDate()
-                    print("done saving to main moc- time \(endTime - startTime)")
-                } catch let error {
-                    NSLog("An error occured while merging a store context save into the main thread context: \(error)")
-                    print("\(error)")
-                }
-            }
-        }
-        
+        managedObjectContext.parentContext = self.saveMoc
+        managedObjectContext.undoManager = nil
         
         return managedObjectContext
     }()
