@@ -1,0 +1,28 @@
+PODS:
+  - Alamofire (3.0.0-beta.1)
+  - Argo (2.1.0)
+  - ReactiveCocoa (4.0.0-alpha-3):
+    - ReactiveCocoa/UI (= 4.0.0-alpha-3)
+    - Result (~> 0.6-beta.4)
+  - ReactiveCocoa/Core (4.0.0-alpha-3):
+    - ReactiveCocoa/no-arc
+    - Result (~> 0.6-beta.4)
+  - ReactiveCocoa/no-arc (4.0.0-alpha-3):
+    - Result (~> 0.6-beta.4)
+  - ReactiveCocoa/UI (4.0.0-alpha-3):
+    - ReactiveCocoa/Core
+    - Result (~> 0.6-beta.4)
+  - Result (0.6.0-beta.5)
+
+DEPENDENCIES:
+  - Alamofire (= 3.0.0-beta.1)
+  - Argo (~> 2.0)
+  - ReactiveCocoa (= 4.0.0-alpha-3)
+
+SPEC CHECKSUMS:
+  Alamofire: b1b493dfb758bb73e6eafce616ea529aca18b2ad
+  Argo: f65db7f50301f7a623514cca2b15aa63e147b91a
+  ReactiveCocoa: f03dcfd385b0e4ee5b7a323f5e0b146a498e12d3
+  Result: 8ae33a29ed1e147514b9536de523a978d7faba1f
+
+COCOAPODS: 0.39.0

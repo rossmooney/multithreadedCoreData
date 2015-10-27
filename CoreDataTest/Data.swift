@@ -20,6 +20,7 @@ class Data {
         let managedObjectContext = NSManagedObjectContext(concurrencyType: NSManagedObjectContextConcurrencyType.PrivateQueueConcurrencyType)
         managedObjectContext.parentContext = self.saveMoc
         managedObjectContext.undoManager = nil
+        print("Private Context Generated")
         return managedObjectContext
     }
     
@@ -27,7 +28,7 @@ class Data {
         if !self.dataIsLoading {
             self.dataIsLoading = true
             loadDataProducer(generateContext()!).startOn(QueueScheduler(qos: QOS_CLASS_UTILITY, name: "")).startWithCompleted({
-                print("Producer completed")
+                print("LoadDataProducer completed")
                 self.dataIsLoading = false
             })
         }
@@ -35,11 +36,13 @@ class Data {
     
     func loadDataProducer(moc: NSManagedObjectContext) -> SignalProducer<(), NoError> {
         return SignalProducer { [weak self] sink, disposable in
-            print("Load data started")
+            let count = 50000
             
-            self?.loadData(moc, count: 50000)
-            
-            print("Load data finished")
+            print("Load data started for \(count) items")
+            let startTime = NSDate.timeIntervalSinceReferenceDate()
+            self?.loadData(moc, count: count)
+            let endTime = NSDate.timeIntervalSinceReferenceDate()
+            print("Load data finished, time: \(endTime - startTime) seconds")
             
             sink.sendCompleted()
         }
@@ -80,10 +83,14 @@ class Data {
     }
     
     func numberOfContacts() -> Int {
-        let moc = generateContext()!
+//        let moc = generateContext()! <-- Using this we don't block the main thread, but NSFRC requires a main thread context
+        let moc = self.mainMoc
         let fetchRequest = NSFetchRequest(entityName: "Contact")
         do {
+            let startTime = NSDate.timeIntervalSinceReferenceDate()
             let fetchedEntities = try moc.executeFetchRequest(fetchRequest) as! [Contact]
+            let endTime = NSDate.timeIntervalSinceReferenceDate()
+            print("Fetch Time = \(endTime - startTime) seconds")
             return fetchedEntities.count
         } catch {
             // Do something in response to error condition
@@ -143,15 +150,15 @@ class Data {
                     return
                 }
                 
-                let priority = DISPATCH_QUEUE_PRIORITY_DEFAULT
+                let priority = DISPATCH_QUEUE_PRIORITY_BACKGROUND
                 dispatch_async(dispatch_get_global_queue(priority, 0)) {
                     do {
-                        print("saving to save moc")
-                        self?.isBlockingMainThread()
+                        print("Merging contexts:")
+                        self?.areWeBlockingTheMainThread()
                         let startTime = NSDate.timeIntervalSinceReferenceDate()
                         try self?.saveMoc.save()
                         let endTime = NSDate.timeIntervalSinceReferenceDate()
-                        print("done saving to save moc- time \(endTime - startTime)")
+                        print("Merged to Parent (save) MOC- Merge time: \(endTime - startTime) seconds")
                     } catch let error {
                         NSLog("An error occured while merging a store context save into the main thread context: \(error)")
                         print("\(error)")
@@ -162,7 +169,6 @@ class Data {
             }
         }
 
-        
         return managedObjectContext
     }()
     
@@ -175,15 +181,6 @@ class Data {
         
         return managedObjectContext
     }()
-    
-//    func contextDidSave(notification: NSNotification) {
-//        let sender = notification.object as! NSManagedObjectContext
-//        if sender != self.mainMoc {
-//            self.mainMoc.mergeChangesFromContextDidSaveNotification(notification)
-//            print("Core Data: merging changes from child context")
-//            saveContext()
-//        }
-//    }
     
     // MARK: - Core Data Saving support
     
@@ -201,8 +198,8 @@ class Data {
         }
     }
     
-    func isBlockingMainThread() {
-        if NSThread.isMainThread() { print("BLOCKING MAIN THREAD") } else { print("not blocking") }
+    func areWeBlockingTheMainThread() {
+        if NSThread.isMainThread() { print("We are blocking the main thread!") } else { print("We are not blocking the main thread.") }
     }
 
 }
