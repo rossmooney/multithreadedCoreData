@@ -41,7 +41,7 @@ func animate(forwards: Bool) {
             self.animatedView.transform = CGAffineTransformMakeRotation(54)
             
         }
-        }) { (success) -> Void in
+        }) { _ in
             self.animate(!forwards)
     }
     

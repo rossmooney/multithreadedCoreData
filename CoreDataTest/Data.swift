@@ -16,45 +16,28 @@ class Data {
     
     var dataIsLoading:Bool = false
     
-    var dataMoc: NSManagedObjectContext = {
-        // Returns the managed object context for the application (which is already bound to the persistent store coordinator for the application.) This property is optional since there are legitimate error conditions that could cause the creation of the context to fail.
-        let coordinator = (UIApplication.sharedApplication().delegate as! AppDelegate).persistentStoreCoordinator
-        var managedObjectContext = NSManagedObjectContext(concurrencyType: .PrivateQueueConcurrencyType)
-        managedObjectContext.persistentStoreCoordinator = coordinator
-        
+    func generateContext() -> NSManagedObjectContext? {
+        let managedObjectContext = NSManagedObjectContext(concurrencyType: NSManagedObjectContextConcurrencyType.PrivateQueueConcurrencyType)
+        managedObjectContext.parentContext = self.mainMoc
+        managedObjectContext.undoManager = nil
         return managedObjectContext
-    }()
-    
-    init() {
-        let coordinator = (UIApplication.sharedApplication().delegate as! AppDelegate).persistentStoreCoordinator
-
-        NSNotificationCenter.defaultCenter().addObserver(self, selector: "persistentStoreDidImportUbiquitousContentChanges:", name:NSPersistentStoreDidImportUbiquitousContentChangesNotification, object: coordinator)
-    }
-    
-    func persistentStoreDidImportUbiquitousContentChanges(notification: NSNotification) {
-        let dictionary = notification.userInfo!
-        print(dictionary)
-        let moc: NSManagedObjectContext = (UIApplication.sharedApplication().delegate as! AppDelegate).managedObjectContext
-        moc.performBlock { () -> Void in
-            moc.mergeChangesFromContextDidSaveNotification(notification)
-        }
     }
     
     func loadAllTheData() {
         if !self.dataIsLoading {
             self.dataIsLoading = true
-            loadDataProducer().startOn(QueueScheduler(qos: QOS_CLASS_UTILITY, name: "")).startWithCompleted({
+            loadDataProducer(generateContext()!).startOn(QueueScheduler(qos: QOS_CLASS_UTILITY, name: "")).startWithCompleted({
                 print("Producer completed")
                 self.dataIsLoading = false
             })
         }
     }
     
-    func loadDataProducer() -> SignalProducer<(), NoError> {
+    func loadDataProducer(moc: NSManagedObjectContext) -> SignalProducer<(), NoError> {
         return SignalProducer { [weak self] sink, disposable in
             print("Load data started")
             
-            self?.loadData(20000)
+            self?.loadData(moc, count: 20000)
             
             print("Load data finished")
             
@@ -63,23 +46,23 @@ class Data {
     }
     
     
-    func loadData(count: Int) {
+    func loadData(moc: NSManagedObjectContext, count: Int) {
 
         for itemIndex in 0...count {
-            let contact = NSManagedObject(entity: NSEntityDescription.entityForName("Contact", inManagedObjectContext: self.dataMoc)!, insertIntoManagedObjectContext: self.dataMoc) as! Contact
+            let contact = NSManagedObject(entity: NSEntityDescription.entityForName("Contact", inManagedObjectContext: moc)!, insertIntoManagedObjectContext: moc) as! Contact
             contact.firstName = "first\(itemIndex)"
             contact.lastName = "last\(itemIndex)"
             contact.contactId = itemIndex
             
             for phoneIndex in 0...3 {
-                let phone = NSManagedObject(entity: NSEntityDescription.entityForName("Phone", inManagedObjectContext: self.dataMoc)!, insertIntoManagedObjectContext: self.dataMoc) as! Phone
+                let phone = NSManagedObject(entity: NSEntityDescription.entityForName("Phone", inManagedObjectContext: moc)!, insertIntoManagedObjectContext: moc) as! Phone
                 phone.contact = contact
                 phone.phoneId = phoneIndex + itemIndex
                 phone.phoneNumber = "\(itemIndex)\(itemIndex)"
             }
 
             for emailIndex in 0...5 {
-                let email = NSManagedObject(entity: NSEntityDescription.entityForName("Email", inManagedObjectContext: self.dataMoc)!, insertIntoManagedObjectContext: self.dataMoc) as! Email
+                let email = NSManagedObject(entity: NSEntityDescription.entityForName("Email", inManagedObjectContext: moc)!, insertIntoManagedObjectContext: moc) as! Email
                 email.contact = contact
                 email.emailId = emailIndex + itemIndex
                 email.emailAddress = "\(itemIndex)\(itemIndex)"
@@ -88,7 +71,7 @@ class Data {
         }
         
         do {
-            try self.dataMoc.save()
+            try moc.save()
         } catch let error {
             print("Failed to save: \(error)")
         }
@@ -97,10 +80,10 @@ class Data {
     }
     
     func numberOfContacts() -> Int {
+        let moc = generateContext()!
         let fetchRequest = NSFetchRequest(entityName: "Contact")
         do {
-            let mainMoc = (UIApplication.sharedApplication().delegate as! AppDelegate).managedObjectContext
-            let fetchedEntities = try mainMoc.executeFetchRequest(fetchRequest) as! [Contact]
+            let fetchedEntities = try moc.executeFetchRequest(fetchRequest) as! [Contact]
             return fetchedEntities.count
         } catch {
             // Do something in response to error condition
@@ -109,4 +92,111 @@ class Data {
         }
     }
     
+    // MARK: - Core Data stack
+    
+    lazy var applicationDocumentsDirectory: NSURL = {
+        // The directory the application uses to store the Core Data store file. This code uses a directory named "com.rossmooney.CoreDataTest" in the application's documents Application Support directory.
+        let urls = NSFileManager.defaultManager().URLsForDirectory(.DocumentDirectory, inDomains: .UserDomainMask)
+        return urls[urls.count-1]
+    }()
+    
+    lazy var managedObjectModel: NSManagedObjectModel = {
+        // The managed object model for the application. This property is not optional. It is a fatal error for the application not to be able to find and load its model.
+        let modelURL = NSBundle.mainBundle().URLForResource("CoreDataTest", withExtension: "momd")!
+        return NSManagedObjectModel(contentsOfURL: modelURL)!
+    }()
+    
+    lazy var persistentStoreCoordinator: NSPersistentStoreCoordinator = {
+        // The persistent store coordinator for the application. This implementation creates and returns a coordinator, having added the store for the application to it. This property is optional since there are legitimate error conditions that could cause the creation of the store to fail.
+        // Create the coordinator and store
+        let coordinator = NSPersistentStoreCoordinator(managedObjectModel: self.managedObjectModel)
+        let url = self.applicationDocumentsDirectory.URLByAppendingPathComponent("SingleViewCoreData.sqlite")
+        let failureReason = "There was an error creating or loading the application's saved data."
+        do {
+            try coordinator.addPersistentStoreWithType(NSSQLiteStoreType, configuration: nil, URL: url, options: nil)
+        } catch {
+            // Report any error we got.
+            var dict = [String: AnyObject]()
+            dict[NSLocalizedDescriptionKey] = "Failed to initialize the application's saved data"
+            dict[NSLocalizedFailureReasonErrorKey] = failureReason
+            
+            dict[NSUnderlyingErrorKey] = error as NSError
+            let wrappedError = NSError(domain: "YOUR_ERROR_DOMAIN", code: 9999, userInfo: dict)
+            // Replace this with code to handle the error appropriately.
+            // abort() causes the application to generate a crash log and terminate. You should not use this function in a shipping application, although it may be useful during development.
+            NSLog("Unresolved error \(wrappedError), \(wrappedError.userInfo)")
+            abort()
+        }
+        
+        return coordinator
+        }()
+    
+    lazy var saveContext: NSManagedObjectContext = {
+        let managedObjectContext = NSManagedObjectContext(concurrencyType: .PrivateQueueConcurrencyType)
+        managedObjectContext.persistentStoreCoordinator = self.persistentStoreCoordinator
+
+        return managedObjectContext
+    }()
+    
+    
+    lazy var mainMoc: NSManagedObjectContext = {
+        // Returns the managed object context for the application (which is already bound to the persistent store coordinator for the application.) This property is optional since there are legitimate error conditions that could cause the creation of the context to fail.
+        let coordinator = self.persistentStoreCoordinator
+        let managedObjectContext = NSManagedObjectContext(concurrencyType: .MainQueueConcurrencyType)
+        managedObjectContext.persistentStoreCoordinator = coordinator
+        
+        NSNotificationCenter.defaultCenter().addObserverForName(NSManagedObjectContextDidSaveNotification, object: nil, queue: NSOperationQueue.mainQueue()) {
+            [weak self] notification in
+            if let savedContext = notification.object as? NSManagedObjectContext {
+                if savedContext == self?.mainMoc {
+                    return
+                }
+                
+                do {
+                    print("saving to main moc")
+                    self?.isBlockingMainThread()
+                    let startTime = NSDate.timeIntervalSinceReferenceDate()
+                    try self?.mainMoc.save()
+                    let endTime = NSDate.timeIntervalSinceReferenceDate()
+                    print("done saving to main moc- time \(endTime - startTime)")
+                } catch let error {
+                    NSLog("An error occured while merging a store context save into the main thread context: \(error)")
+                    print("\(error)")
+                }
+            }
+        }
+        
+        
+        return managedObjectContext
+    }()
+    
+//    func contextDidSave(notification: NSNotification) {
+//        let sender = notification.object as! NSManagedObjectContext
+//        if sender != self.mainMoc {
+//            self.mainMoc.mergeChangesFromContextDidSaveNotification(notification)
+//            print("Core Data: merging changes from child context")
+//            saveContext()
+//        }
+//    }
+    
+    // MARK: - Core Data Saving support
+    
+    func saveContext () {
+        if self.mainMoc.hasChanges {
+            do {
+                try self.mainMoc.save()
+            } catch {
+                // Replace this implementation with code to handle the error appropriately.
+                // abort() causes the application to generate a crash log and terminate. You should not use this function in a shipping application, although it may be useful during development.
+                let nserror = error as NSError
+                NSLog("Unresolved error \(nserror), \(nserror.userInfo)")
+                abort()
+            }
+        }
+    }
+    
+    func isBlockingMainThread() {
+        if NSThread.isMainThread() { print("BLOCKING MAIN THREAD") } else { print("not blocking") }
+    }
+
 }

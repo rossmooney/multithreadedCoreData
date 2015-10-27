@@ -42,7 +42,7 @@ class FirstViewController: UIViewController {
                 self.animatedView.transform = CGAffineTransformMakeRotation(360)
 
             }
-            }) { (success) -> Void in
+            }) { _ in
                 //Keep it going
                 self.animate(!forwards)
         }
