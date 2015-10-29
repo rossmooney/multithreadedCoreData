@@ -78,8 +78,51 @@ class Data {
         } catch let error {
             print("Failed to save: \(error)")
         }
+    }
+    
+    func countForEntity(entity: String) -> Int {
+        let fetchRequest = NSFetchRequest(entityName: entity)
+        fetchRequest.includesPropertyValues = false
+        fetchRequest.includesSubentities = false
+        return self.mainMoc.countForFetchRequest(fetchRequest, error: nil)
+    }
+    
+    func fetchInPages(itemsPerPage: Int) -> [Contact] {
         
+        let pageCount = countForEntity("Contact") / itemsPerPage
         
+        let numbers = 0..<pageCount
+        
+        let reduced = numbers.reduce([Contact](), combine: { (var contacts:[Contact], pageNumber:Int) -> [Contact] in
+            let contactResults = fetchContactPage(self.mainMoc, itemsInPage: itemsPerPage, pageNumber: pageNumber) as [Contact]
+            contacts.appendContentsOf(contactResults)
+            
+            return contacts
+        })
+        
+        return reduced
+    }
+    
+    enum CoreDataError : ErrorType {
+        case CatastrophicFailureOfBiblicalProportions
+    }
+    
+    func fetchContactPage(moc: NSManagedObjectContext, itemsInPage: Int, pageNumber: Int) -> [Contact] {
+        let fetchRequest = NSFetchRequest(entityName: "Contact")
+        fetchRequest.fetchLimit = itemsInPage
+        fetchRequest.fetchOffset = pageNumber
+        
+        do {
+            let startTime = NSDate.timeIntervalSinceReferenceDate()
+            let fetchedEntities = try moc.executeFetchRequest(fetchRequest) as! [Contact]
+            let endTime = NSDate.timeIntervalSinceReferenceDate()
+            print("Fetch Time = \(endTime - startTime) seconds")
+            
+            return fetchedEntities
+        } catch let error {
+            print("Failed to fetch contact page: \(error)")
+            return [Contact]()
+        }
     }
     
     func numberOfContacts() -> Int {
@@ -147,6 +190,7 @@ class Data {
             [weak self] notification in
             if let savedContext = notification.object as? NSManagedObjectContext {
                 if savedContext == self?.saveMoc {
+                    savedContext.reset()
                     return
                 }
                 
@@ -159,6 +203,7 @@ class Data {
                         try self?.saveMoc.save()
                         let endTime = NSDate.timeIntervalSinceReferenceDate()
                         print("Merged to Parent (save) MOC- Merge time: \(endTime - startTime) seconds")
+                        savedContext.reset()
                     } catch let error {
                         NSLog("An error occured while merging a store context save into the main thread context: \(error)")
                         print("\(error)")

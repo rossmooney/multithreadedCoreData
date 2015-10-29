@@ -26,7 +26,7 @@
                                 </constraints>
                                 <state key="normal" title="Screen 1"/>
                                 <connections>
-                                    <segue destination="7WX-lz-CcH" kind="show" animates="NO" id="6DJ-IN-mr3"/>
+                                    <segue destination="7WX-lz-CcH" kind="show" id="FhA-0t-1bT"/>
                                 </connections>
                             </button>
                         </subviews>
@@ -40,7 +40,7 @@
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="dkx-z0-nzr" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="305" y="365"/>
+            <point key="canvasLocation" x="-450" y="341"/>
         </scene>
         <!--Second View Controller-->
         <scene sceneID="8QU-mZ-Fsa">
@@ -55,31 +55,92 @@
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
                             <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="9D8-dN-XBp">
-                                <rect key="frame" x="200" y="200" width="200" height="200"/>
+                                <rect key="frame" x="0.0" y="0.0" width="600" height="43"/>
                                 <animations/>
                                 <color key="backgroundColor" red="0.08235294118" green="0.50588235290000005" blue="0.8862745098" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                                 <constraints>
                                     <constraint firstAttribute="width" constant="200" id="5ge-b8-rgx"/>
                                     <constraint firstAttribute="height" constant="200" id="nvE-tm-QnU"/>
+                                    <constraint firstAttribute="height" constant="43" id="qEk-qG-uQN"/>
                                 </constraints>
                                 <state key="normal" title="Screen 2">
                                     <color key="titleColor" red="0.96862745100000003" green="0.96862745100000003" blue="0.96862745100000003" alpha="1" colorSpace="calibratedRGB"/>
                                 </state>
+                                <variation key="default">
+                                    <mask key="constraints">
+                                        <exclude reference="5ge-b8-rgx"/>
+                                        <exclude reference="nvE-tm-QnU"/>
+                                    </mask>
+                                </variation>
                                 <connections>
-                                    <segue destination="BYZ-38-t0r" kind="show" animates="NO" id="qkv-bQ-2YP"/>
+                                    <segue destination="BYZ-38-t0r" kind="show" id="yZz-fa-gqR"/>
                                 </connections>
                             </button>
+                            <tableView clipsSubviews="YES" contentMode="scaleToFill" alwaysBounceVertical="YES" dataMode="prototypes" style="plain" separatorStyle="default" rowHeight="44" sectionHeaderHeight="28" sectionFooterHeight="28" translatesAutoresizingMaskIntoConstraints="NO" id="oBm-Nd-Yss">
+                                <rect key="frame" x="0.0" y="51" width="600" height="549"/>
+                                <animations/>
+                                <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
+                                <prototypes>
+                                    <tableViewCell clipsSubviews="YES" contentMode="scaleToFill" selectionStyle="blue" hidesAccessoryWhenEditing="NO" indentationLevel="1" indentationWidth="0.0" reuseIdentifier="Cell" id="9oG-R8-Wg9" customClass="Cell" customModule="CoreDataTest" customModuleProvider="target">
+                                        <rect key="frame" x="0.0" y="28" width="600" height="44"/>
+                                        <autoresizingMask key="autoresizingMask"/>
+                                        <tableViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" tableViewCell="9oG-R8-Wg9" id="cKF-dA-Pca">
+                                            <rect key="frame" x="0.0" y="0.0" width="600" height="43.5"/>
+                                            <autoresizingMask key="autoresizingMask"/>
+                                            <subviews>
+                                                <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Label" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="zVq-Ez-KYC">
+                                                    <rect key="frame" x="279" y="12" width="42" height="21"/>
+                                                    <animations/>
+                                                    <fontDescription key="fontDescription" type="system" pointSize="17"/>
+                                                    <color key="textColor" cocoaTouchSystemColor="darkTextColor"/>
+                                                    <nil key="highlightedColor"/>
+                                                </label>
+                                            </subviews>
+                                            <animations/>
+                                            <constraints>
+                                                <constraint firstItem="zVq-Ez-KYC" firstAttribute="centerY" secondItem="cKF-dA-Pca" secondAttribute="centerY" id="XlW-73-xUZ"/>
+                                                <constraint firstItem="zVq-Ez-KYC" firstAttribute="centerX" secondItem="cKF-dA-Pca" secondAttribute="centerX" id="lhz-zn-dHs"/>
+                                            </constraints>
+                                        </tableViewCellContentView>
+                                        <animations/>
+                                        <connections>
+                                            <outlet property="label" destination="zVq-Ez-KYC" id="0zp-nw-aWG"/>
+                                        </connections>
+                                    </tableViewCell>
+                                </prototypes>
+                                <connections>
+                                    <outlet property="dataSource" destination="7WX-lz-CcH" id="S0k-4I-etb"/>
+                                    <outlet property="delegate" destination="7WX-lz-CcH" id="eTe-fp-Tx2"/>
+                                </connections>
+                            </tableView>
                         </subviews>
                         <animations/>
                         <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
                         <constraints>
+                            <constraint firstItem="oBm-Nd-Yss" firstAttribute="leading" secondItem="7B3-OP-Slp" secondAttribute="leading" id="03t-vH-hK5"/>
+                            <constraint firstItem="oBm-Nd-Yss" firstAttribute="top" secondItem="9D8-dN-XBp" secondAttribute="bottom" constant="8" id="2He-h2-YYo"/>
+                            <constraint firstItem="5lQ-HQ-loF" firstAttribute="top" secondItem="oBm-Nd-Yss" secondAttribute="bottom" id="CbD-pK-In8"/>
+                            <constraint firstItem="9D8-dN-XBp" firstAttribute="leading" secondItem="7B3-OP-Slp" secondAttribute="leading" id="O0J-Mq-FoU"/>
                             <constraint firstItem="9D8-dN-XBp" firstAttribute="centerY" secondItem="7B3-OP-Slp" secondAttribute="centerY" id="UUb-tS-VLk"/>
+                            <constraint firstItem="9D8-dN-XBp" firstAttribute="top" secondItem="7B3-OP-Slp" secondAttribute="top" id="Ya6-aS-vN8"/>
+                            <constraint firstAttribute="trailing" secondItem="9D8-dN-XBp" secondAttribute="trailing" id="a4y-dS-bip"/>
+                            <constraint firstAttribute="trailing" secondItem="oBm-Nd-Yss" secondAttribute="trailing" id="oco-Oq-YKF"/>
                             <constraint firstItem="9D8-dN-XBp" firstAttribute="centerX" secondItem="7B3-OP-Slp" secondAttribute="centerX" id="yPL-YG-Q9y"/>
                         </constraints>
+                        <variation key="default">
+                            <mask key="constraints">
+                                <exclude reference="UUb-tS-VLk"/>
+                                <exclude reference="yPL-YG-Q9y"/>
+                            </mask>
+                        </variation>
                     </view>
+                    <connections>
+                        <outlet property="tableView" destination="oBm-Nd-Yss" id="9kL-N7-PBg"/>
+                    </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="cHA-6W-2Yo" userLabel="First Responder" sceneMemberID="firstResponder"/>
             </objects>
+            <point key="canvasLocation" x="325" y="227"/>
         </scene>
     </scenes>
 </document>

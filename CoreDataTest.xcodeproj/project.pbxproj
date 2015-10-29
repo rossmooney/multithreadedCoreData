@@ -23,6 +23,7 @@
 		A1B64B471BD970300067FA12 /* Contact+CoreDataProperties.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B64B411BD970300067FA12 /* Contact+CoreDataProperties.swift */; };
 		A1B64B481BD970300067FA12 /* Contact.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B64B421BD970300067FA12 /* Contact.swift */; };
 		A1B64B4A1BD970630067FA12 /* Data.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B64B491BD970630067FA12 /* Data.swift */; };
+		A1B7C4A51BE1647900F70EAE /* Cell.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B7C4A41BE1647900F70EAE /* Cell.swift */; };
 		A1F5CD501BDE559200FE2507 /* SecondViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1F5CD4F1BDE559200FE2507 /* SecondViewController.swift */; };
 /* End PBXBuildFile section */
 
@@ -59,6 +60,7 @@
 		A1B64B411BD970300067FA12 /* Contact+CoreDataProperties.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = "Contact+CoreDataProperties.swift"; path = "../Contact+CoreDataProperties.swift"; sourceTree = "<group>"; };
 		A1B64B421BD970300067FA12 /* Contact.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = Contact.swift; path = ../Contact.swift; sourceTree = "<group>"; };
 		A1B64B491BD970630067FA12 /* Data.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Data.swift; sourceTree = "<group>"; };
+		A1B7C4A41BE1647900F70EAE /* Cell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Cell.swift; sourceTree = "<group>"; };
 		A1F5CD4F1BDE559200FE2507 /* SecondViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SecondViewController.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -141,6 +143,7 @@
 				A1B64B281BD96B470067FA12 /* AppDelegate.swift */,
 				A1B64B2A1BD96B470067FA12 /* FirstViewController.swift */,
 				A1F5CD4F1BDE559200FE2507 /* SecondViewController.swift */,
+				A1B7C4A41BE1647900F70EAE /* Cell.swift */,
 				A1B64B491BD970630067FA12 /* Data.swift */,
 				A1B64B2C1BD96B470067FA12 /* Main.storyboard */,
 				A1B64B321BD96B470067FA12 /* Assets.xcassets */,
@@ -323,6 +326,7 @@
 				A1B64B431BD970300067FA12 /* Email+CoreDataProperties.swift in Sources */,
 				A1B64B441BD970300067FA12 /* Email.swift in Sources */,
 				A1B64B451BD970300067FA12 /* Phone+CoreDataProperties.swift in Sources */,
+				A1B7C4A51BE1647900F70EAE /* Cell.swift in Sources */,
 				A1B64B2B1BD96B470067FA12 /* FirstViewController.swift in Sources */,
 				A1B64B471BD970300067FA12 /* Contact+CoreDataProperties.swift in Sources */,
 				A1B64B461BD970300067FA12 /* Phone.swift in Sources */,
