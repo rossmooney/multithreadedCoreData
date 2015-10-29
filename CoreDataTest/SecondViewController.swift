@@ -12,6 +12,7 @@ import CoreData
 class SecondViewController: UIViewController {
     
     @IBOutlet weak var tableView:UITableView!
+    @IBOutlet weak var searchField:UITextField!
     
     var currentPage = 1
     static var pageSize = 30
@@ -37,16 +38,20 @@ class SecondViewController: UIViewController {
     
     override func viewDidLoad() {
 
-    //Setup
-    self.animatedView = UIView(frame: CGRect(x: 0, y: 0, width: 20, height: 20))
-    self.animatedView.backgroundColor = .redColor()
-    self.view.addSubview(self.animatedView)
-        
+        //Setup
+        self.animatedView = UIView(frame: CGRect(x: 0, y: 0, width: 20, height: 20))
+        self.animatedView.backgroundColor = .redColor()
+        self.view.addSubview(self.animatedView)
+            
         do {
             try fetchedResultsController.performFetch()
         } catch {
             print("An error occurred")
         }
+
+        
+        self.searchField.delegate = self // Replace TextField with the name of your textField
+        self.searchField.addTarget(self, action: "textFieldDidChange:", forControlEvents: UIControlEvents.EditingChanged)
 
     }
 
@@ -102,20 +107,9 @@ extension SecondViewController : UITableViewDataSource {
         let contact = fetchedResultsController.objectAtIndexPath(indexPath) as! Contact
         
         cell.label?.text = contact.firstName! + " " + contact.lastName!
-//        cell.detailTextLabel?.text = contact
-        
         return cell
     }
-//
-//    public func tableView(tableView: UITableView, titleForHeaderInSection section: Int) -> String? {
-//        if let sections = fetchedResultsController.sections {
-//            let currentSection = sections[section]
-//            return currentSection.name
-//        }
-//        
-//        return nil
-//    }
-    
+
 }
 
 // MARK: NSFetchedResultsControllerDelegate
@@ -170,6 +164,18 @@ extension SecondViewController : UIScrollViewDelegate {
     func scrollViewDidScroll(scrollView: UIScrollView) {
         if scrollView.contentOffset.y + scrollView.frame.size.height > scrollView.contentSize.height - 50 {
             loadNextPage()
+        }
+    }
+}
+
+extension SecondViewController : UITextFieldDelegate {
+    func textFieldDidChange(textField: UITextField) {
+        self.fetchedResultsController.fetchRequest.predicate = NSPredicate(format: "firstName CONTAINS %@", textField.text!)
+        do {
+            try self.fetchedResultsController.performFetch()
+            self.tableView.reloadData()
+        } catch let error {
+            print("Error loading next page: \(error)")
         }
     }
 }

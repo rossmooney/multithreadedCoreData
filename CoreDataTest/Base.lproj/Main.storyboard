@@ -2,6 +2,7 @@
 <document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="9059" systemVersion="15B42" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" initialViewController="BYZ-38-t0r">
     <dependencies>
         <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="9049"/>
+        <capability name="Constraints to layout margins" minToolsVersion="6.0"/>
     </dependencies>
     <scenes>
         <!--First View Controller-->
@@ -77,7 +78,7 @@
                                 </connections>
                             </button>
                             <tableView clipsSubviews="YES" contentMode="scaleToFill" alwaysBounceVertical="YES" dataMode="prototypes" style="plain" separatorStyle="default" rowHeight="44" sectionHeaderHeight="28" sectionFooterHeight="28" translatesAutoresizingMaskIntoConstraints="NO" id="oBm-Nd-Yss">
-                                <rect key="frame" x="0.0" y="51" width="600" height="549"/>
+                                <rect key="frame" x="0.0" y="89" width="600" height="511"/>
                                 <animations/>
                                 <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
                                 <prototypes>
@@ -89,7 +90,7 @@
                                             <autoresizingMask key="autoresizingMask"/>
                                             <subviews>
                                                 <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Label" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="zVq-Ez-KYC">
-                                                    <rect key="frame" x="279" y="12" width="42" height="21"/>
+                                                    <rect key="frame" x="279" y="12" width="42" height="20.5"/>
                                                     <animations/>
                                                     <fontDescription key="fontDescription" type="system" pointSize="17"/>
                                                     <color key="textColor" cocoaTouchSystemColor="darkTextColor"/>
@@ -113,6 +114,12 @@
                                     <outlet property="delegate" destination="7WX-lz-CcH" id="eTe-fp-Tx2"/>
                                 </connections>
                             </tableView>
+                            <textField opaque="NO" clipsSubviews="YES" contentMode="scaleToFill" contentHorizontalAlignment="left" contentVerticalAlignment="center" borderStyle="roundedRect" placeholder="Enter search string" textAlignment="natural" minimumFontSize="17" translatesAutoresizingMaskIntoConstraints="NO" id="61K-6j-NPe">
+                                <rect key="frame" x="30" y="51" width="540" height="30"/>
+                                <animations/>
+                                <fontDescription key="fontDescription" type="system" pointSize="14"/>
+                                <textInputTraits key="textInputTraits"/>
+                            </textField>
                         </subviews>
                         <animations/>
                         <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
@@ -121,9 +128,13 @@
                             <constraint firstItem="oBm-Nd-Yss" firstAttribute="top" secondItem="9D8-dN-XBp" secondAttribute="bottom" constant="8" id="2He-h2-YYo"/>
                             <constraint firstItem="5lQ-HQ-loF" firstAttribute="top" secondItem="oBm-Nd-Yss" secondAttribute="bottom" id="CbD-pK-In8"/>
                             <constraint firstItem="9D8-dN-XBp" firstAttribute="leading" secondItem="7B3-OP-Slp" secondAttribute="leading" id="O0J-Mq-FoU"/>
+                            <constraint firstItem="61K-6j-NPe" firstAttribute="leading" secondItem="7B3-OP-Slp" secondAttribute="leadingMargin" constant="10" id="O84-lC-ov2"/>
                             <constraint firstItem="9D8-dN-XBp" firstAttribute="centerY" secondItem="7B3-OP-Slp" secondAttribute="centerY" id="UUb-tS-VLk"/>
                             <constraint firstItem="9D8-dN-XBp" firstAttribute="top" secondItem="7B3-OP-Slp" secondAttribute="top" id="Ya6-aS-vN8"/>
+                            <constraint firstItem="61K-6j-NPe" firstAttribute="top" secondItem="9D8-dN-XBp" secondAttribute="bottom" constant="8" id="ZPw-44-Xfg"/>
+                            <constraint firstItem="oBm-Nd-Yss" firstAttribute="top" secondItem="61K-6j-NPe" secondAttribute="bottom" constant="8" id="a4t-7t-yY4"/>
                             <constraint firstAttribute="trailing" secondItem="9D8-dN-XBp" secondAttribute="trailing" id="a4y-dS-bip"/>
+                            <constraint firstAttribute="trailingMargin" secondItem="61K-6j-NPe" secondAttribute="trailing" constant="10" id="mcP-8v-FdG"/>
                             <constraint firstAttribute="trailing" secondItem="oBm-Nd-Yss" secondAttribute="trailing" id="oco-Oq-YKF"/>
                             <constraint firstItem="9D8-dN-XBp" firstAttribute="centerX" secondItem="7B3-OP-Slp" secondAttribute="centerX" id="yPL-YG-Q9y"/>
                         </constraints>
@@ -131,10 +142,12 @@
                             <mask key="constraints">
                                 <exclude reference="UUb-tS-VLk"/>
                                 <exclude reference="yPL-YG-Q9y"/>
+                                <exclude reference="2He-h2-YYo"/>
                             </mask>
                         </variation>
                     </view>
                     <connections>
+                        <outlet property="searchField" destination="61K-6j-NPe" id="1Pw-Ov-6Ok"/>
                         <outlet property="tableView" destination="oBm-Nd-Yss" id="9kL-N7-PBg"/>
                     </connections>
                 </viewController>
