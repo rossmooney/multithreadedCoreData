@@ -13,6 +13,8 @@ class SecondViewController: UIViewController {
     
     @IBOutlet weak var tableView:UITableView!
     
+    var currentPage = 1
+    static var pageSize = 30
     
     var animatedView:UIView!
     lazy var fetchedResultsController: NSFetchedResultsController = {
@@ -20,6 +22,7 @@ class SecondViewController: UIViewController {
         let primarySortDescriptor = NSSortDescriptor(key: "firstName", ascending: true)
         request.sortDescriptors = [primarySortDescriptor]
         request.fetchBatchSize = 100
+        request.fetchLimit = pageSize
         
         let frc = NSFetchedResultsController(
             fetchRequest: request,
@@ -147,6 +150,26 @@ extension SecondViewController : NSFetchedResultsControllerDelegate {
                 self.tableView.moveRowAtIndexPath(oldPath, toIndexPath: newPath)
                 dispatch_async(dispatch_get_main_queue(), { self.tableView.reloadRowsAtIndexPaths([newPath], withRowAnimation: .None) })
             }
+        }
+    }
+    
+    func loadNextPage() {
+        currentPage++
+        self.fetchedResultsController.fetchRequest.fetchLimit = currentPage * SecondViewController.pageSize
+        do {
+            try self.fetchedResultsController.performFetch()
+            self.tableView.reloadData()
+        } catch let error {
+            print("Error loading next page: \(error)")
+        }
+    
+    }
+}
+
+extension SecondViewController : UIScrollViewDelegate {
+    func scrollViewDidScroll(scrollView: UIScrollView) {
+        if scrollView.contentOffset.y + scrollView.frame.size.height > scrollView.contentSize.height - 50 {
+            loadNextPage()
         }
     }
 }
